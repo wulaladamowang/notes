@@ -59,3 +59,12 @@ RPM安装方式， dpkg安装方式
 /var/log/目录下记录着计算机运行的一些信息
 
 # 第二章、主机规划与磁盘分区
+## linux 下常见的设备及其文件名  
+SCSI/SATA/USB硬盘机/USB闪存盘 /dev/sd[a-p]  
+Vritl/O界面 /dev/vd[a-p]  
+软盘机 /dev/fd[0-7]  
+打印机 /dev/lp[0-2]25针打印机 /dev/lp[0-15]（USB接口）  
+鼠标 /dev/input/mouse[0-15] /dev/input/mouse当前使用 /dev/psaux（PS/2界面）  
+
+
+
