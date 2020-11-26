@@ -1,4 +1,5 @@
 WTA: winner takes all
+Disparity propagation (PatchMatch)
 TAD: truncated absolute differences (TAD)
     e(x, y, d) = min{|Ir(x, y)-It(x+d, y)|, T}
 
@@ -35,3 +36,14 @@ TAD: truncated absolute differences (TAD)
     NCC 向量余弦
     AD+Census 加权
     CNN   
+## 代价空间和滑动窗口
+    代价窗口可以减小滑动窗口的冗余计算
+## 代价聚合
+    在视差图上进行滤波
+        均值滤波 双边滤波（可以保留边缘特性，窗口可以开的更大， 匹配更加稳定）
+        cross-based local stereo matching 自适应阈值窗口
+        sgm : 能量函数，考虑视差图的平滑性 动态规划算法加速
+## 视差优化
+    左右一致性检测
+    speckle filter
+    亚像素插值
