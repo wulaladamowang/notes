@@ -56,3 +56,17 @@ TAD: truncated absolute differences (TAD)
     Stereo-Net(2018)
     GA-Net(2019)
     EdgejStereo(2020)
+
+
+# 全局匹配算法
+## 动态规划算法（dp）
+    全局能量函数： E(d) = E(data) + E(smooth)
+    E(data) = m(p, d) = sum(C(p,d)) 左像素与视差为d的右像素之间的匹配代价函数
+    E(smooth) = sum(s(dp, dq))p,q 属于N
+    N表示相邻像素对的集合，dp,dq分别代表两个相邻像素点的视差，s代表平滑项约束
+    忽略了扫描线之间的视差约束，视差图有明显的条纹现象
+
+    通过像素点间的相互约束的领域范围，产生几种树结构的DP算法
+    基于控制点的双向动态规划匹配，通过事先确定的正确匹配点作为匹配控制点，在动态规划的过程中对寻优路径进行指导，降低复杂度，减少条纹瑕疵。
+![](pictures/动态规划全局平滑项.png)
+![](pictures/树结构DP算法图.png)
