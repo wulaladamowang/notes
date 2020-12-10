@@ -30,3 +30,5 @@ vertical resize -5
 标签页
 tabe
 tabnext切换标签页
+
+set mouse=a 使用鼠标
