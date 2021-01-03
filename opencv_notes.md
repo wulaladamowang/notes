@@ -10,3 +10,9 @@ src.convertTo(dst, type, scale, shift)
        scale:比例因子；
        shift：将输入数组元素按比例缩放后添加的值；
        dst(i)=src(i)xscale+(shift,shift,...)
+
+applycolormap()产生彩色图像
+
+
+
+
