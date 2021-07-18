@@ -12,7 +12,7 @@
 ### #define 发生在预处理过程，其并未进入记号表
 ### 定义常量指针，若头文件中定义一个常量char\*based字符串，const须写两次,const char\* const authorName = "ABC",同时，string对象比char\* based合宜。const std::string autorName("ABC")
 ### class专属常量,为了将常量的作用域限制在class内,使它成为class的一个成员,为了确保只有一份实体,让他成为一个static成员。
-'''
+'''cpp
 class GamePlayer{
 private:
     static const int NumTurns = 5; //常量声明式
@@ -20,7 +20,7 @@ private:
 }
 '''
 ### 如果class专属常量是static且为整数类型，则需特殊处理，只要不取他们的地址，可以声明并使用他们而无须提供定义式。如果取某个class专属常量的地址，或者不取地址，但编译器却坚持看定义式，则需提供定义式如下：const int GamePlayer::NumTurns;// 定义。将该文件应该放在实现文件而非头文件，由于class常量已经在声明时获得初值，则定义时不可以再设初值。
-'''
+'''cpp
 class GamePlayer{
 private:
     enum { NumTurns = 5 };//
@@ -35,7 +35,7 @@ private:
   CALL_WITH_MAX(++a, b+10);
 '''
 ### 在上述代码中，每次调用a会被增加两次。
-'''
+'''cpp
 template<typename T>
 inline void callWithMax(const T& a, const T& b){
     f(a > b ? a:b);
