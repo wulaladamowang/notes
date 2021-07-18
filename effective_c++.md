@@ -30,10 +30,10 @@ private:
 ```
 ### the enum hack:一个属于枚举类型的数值可权充int被使用。enum和#define一样不会导致非必要的内存分配
 ```c++
-\\#define CALL_WITH_MAX(a, b) f((a)>(b) ? (a):(b))
-  int a = 5, b = 0;
-  CALL_WITH_MAX(++a, b);
-  CALL_WITH_MAX(++a, b+10);
+#define CALL_WITH_MAX(a, b) f((a)>(b) ? (a):(b))
+int a = 5, b = 0;
+CALL_WITH_MAX(++a, b);
+CALL_WITH_MAX(++a, b+10);
 ```
 ### 在上述代码中，每次调用a会被增加两次。
 ```c++
