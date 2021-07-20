@@ -121,3 +121,28 @@ public:
 ### c part of c++初始化可能招致运行期成本，那么就不保证发生初始化，一旦进入到non-c part of c++,规则就有些变化。可用于解释array不保证其内容被初始化，vector保证被初始化
 ### 永远在使用对象之前将它初始化，确保每一个构造函数都将对象的每一个成员初始化。
 ### c++规定，对象的成员变量的初始化动作发生在进入构造函数本体之前，之后的应该称为赋值，内置类型则不一定。
+### 内置类型的初始化与赋值成本相同。
+### 如果成员变量是const或references，那么他就一定需要初值，而不能被赋值。
+### c++的成员初始化次序，base classes早于derived classes，class的成员变量总是以其声明次序被初始化。
+### c++对定义于不同编译单元内的non-local static对象的初始化次序并无明确定义;编译单元是指产出单一目标文件的那些源码，基本上是单一源码文件加上其所含入的头文件;non-local static对象是global或位于namespace作用域内，亦或在class内或file作用域内被声明为static。
+### 解决初始化次序问题的方法：将每个non-local static对象搬到自己的专属函数内（该对象在此函数内被声明为static），这些函数返回一个reference指向它所含的对象，然后用户调用这些函数。这是Singleton模式的一个常见实现方法。优势：在未调用该non-local static对象时，构造函数和析构函数就不会发生。
+```c++
+class FileSystem{...};
+FileSystem& tfs(){
+    static FileSystem fs;
+    return fs;
+}
+class Directory{...};
+Directory::Directory(params){
+    size_t disks = tfs().numDisks();
+}
+Directory& temDir(){
+    static Directory td;
+    return td;
+}
+```
+### 上述函数在多线程环境下会有麻烦，解决方法是：在程序的单线程启动阶段就手工调用所有的reference-returning函数。但要记住上述过程中的依赖关系。
+### 为了避免在对象初始化之前过早的使用他们，第一：要手工初始化内置类型的non-member对象。第二：使用成员初值列对付成员的所有成分。第三：在初始化次序不确定性氛围下加强你的设计。
+### 对内置类型对象进行手工初始化，因为c++不保证会初始化他们。
+### 构造函数最好使用成员初值列，避免在构造函数本体内使用赋值操作；初值列出的成员变量的排列次序尽量和他们在class中的声明次序相同。
+### 为免除跨编译单元之初始化次序问题，请以local staic对象替换non-local static对象。
