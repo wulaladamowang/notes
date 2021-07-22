@@ -146,3 +146,57 @@ Directory& temDir(){
 ### 对内置类型对象进行手工初始化，因为c++不保证会初始化他们。
 ### 构造函数最好使用成员初值列，避免在构造函数本体内使用赋值操作；初值列出的成员变量的排列次序尽量和他们在class中的声明次序相同。
 ### 为免除跨编译单元之初始化次序问题，请以local staic对象替换non-local static对象。
+# 2构造/析构/赋值操作
+## 条款05：了解c++默默编写并调用哪些函数
+### 如果自己没有声明，编译器会声明一个copy构造函数、一个copy assignment操作符和一个析构函数。如果没有声明任何构造函数，编译器会声明一个default构造函数，这些函数都是public且inline函数。
+```c++
+class Empty {};
+
+class Empty {
+public:
+    Empty(){...}//default构造函数
+    Empty(const Empty& rhs){...}//copy构造函数
+    ~Empty() {...}//析构函数
+
+    Empty& operator=(const Empty& rhs){...}//copy assignment操作符
+};
+```
+### 当上述函数被需要时，它们才会被编译器创造出来。
+### 编译器产出的析构函数是个non-virtual，除非这个class的base class自身声明有virtual析构函数，这个情况下这个函数的虚属性，主要来自base class
+### copy构造函数和copy assignment操作符，编译器创建的版本只是单纯地将来源对象的每一个non-static成员变量拷贝到目标对象。
+### 当自己声明了一个构造函数，编译器是不再为它创建default构造函数.
+### 没有声明copy构造函数和copy assignment操作符时，编译器会创造这些函数，如果他们被调用的话。
+### 面对类中的reference和const成员变量，默认copy assignment无能为力，此时应该自定义copy assignment函数；当base classes将copy assignment对象声明为private时.编译器为derived classes所生的copy assignment操作符想象中可以处理base class成分，但是，它们无法调用derived class无权调用的成员函数，编译器也无能为力。
+### 编译器可以暗自为class创建default构造函数、copy构造函数、copy assignment操作符以及析构函数。
+## 条款06：若不想使用编译器自动生成的函数，就该明确拒绝。
+### 将copy构造函数和copy assignment操作符声明为private可以做到不支持拷贝构造，但是其member函数以及friend函数会可以调用。
+### 专门设计函数用于阻止copying动作，将其作为base class。
+```c++
+class Uncopyable{
+protected:
+    Uncopyable(){};
+    ~Uncopyable(){};
+private:
+    Uncopyable(const Uncopyable&);
+    Uncopyable& operator=(const Uncopyable&);
+};
+class HomeForSale :private Uncopyable {
+
+};
+```
+### 任何一个member函数以及friend函数尝试拷贝HomeForSale对象，编译器便尝试着生成一个copy构造函数和copy assignment操作符号.但是，这些编译器生成版会调用base class的对应兄弟，调用会被编译器拒绝，因为其base class的拷贝函数是private。
+### 为驳回编译器自动(暗自)提供的机能，可将；相应的成员函数声明为private并且不予实现，使用像Uncopyable这样的base class也是一种做法。
+## 条款07：为多态基类声明为virtual析构函数
+### 某个函数返回的函数为子类的对象，但是函数返回值为基类类型，在使用delete时，则只有基类部分被释放掉，造成了资源的浪费；解决上述问题的方式为给base class一个virtual析构函数，此时会消除整个对象。
+### 任何一个class只要带有virtual函数都几乎确定应该也有一个virtual析构函数。
+### 只有当class内含有至少一个virtual函数，才将其声明为virtual析构函数；如果class不含virtual函数，通常表示他并不意图被用作一个base class。
+### pure virtual函数导致abstract classes，也就是不能被实体化的class。
+```c++
+class AWOV {
+public:
+    virtual ~AWOV() = 0; //声明pure virtual 析构函数
+};
+AWOV::~AWOV(){};//pure virtual析构函数的定义
+```
+### polymorphic base classes 应该声明为一个virtual析构函数，如果class带有任何virtual函数，他就应该拥有一个virtual析构函数。
+### Classes的设计目的如果不是作为base classes使用，或不是为了具备多态性，就不应声明为virtual析构函数。
