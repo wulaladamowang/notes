@@ -200,3 +200,91 @@ AWOV::~AWOV(){};//pure virtual析构函数的定义
 ```
 ### polymorphic base classes 应该声明为一个virtual析构函数，如果class带有任何virtual函数，他就应该拥有一个virtual析构函数。
 ### Classes的设计目的如果不是作为base classes使用，或不是为了具备多态性，就不应声明为virtual析构函数。
+## 条款08：别让异常逃离析构函数
+### 将析构函数利用try catch进行处理，利用std::abort()函数，此时仍然是异常吞掉。
+### 通过设置标志位进行资源的释放。
+```c++
+class DBConnection{
+public:
+    static DBConnection create();
+    void close();
+};
+class DBConn{
+public:
+    void close(){
+        db.close();
+        closed = true;
+    }
+    ~DBConn(){
+        if (!closed){
+            try{
+                db.close();
+            }
+            catch(...){
+
+            }
+        }
+    }
+private:
+    DBConnection db;
+    bool closed;
+};
+```
+### 析构函数绝对不要吐出异常。如果一个被析构函数调用的函数可能抛出异常，析构函数应该捕捉任何异常，然后吞下它们或结束程序。
+### 如果客户需要对某个操作函数运行时期间抛出的异常作出反应，那么class应该提供一个普通函数（而非在析构函数）中执行该操作。
+## 条款09：绝不在构造和析构过程中调用virtual函数
+### 因为derived classes函数的成员变量可能处于未定义的状态，则在base class构造和析构期间调用的virtual函数不可下降至derived classe。
+## 条款10：令operator=返回一个reference to \*this
+```c++
+class Widget{
+public:
+    ...
+        Widget& operator=(const Widget& rhs){
+
+            return *this;
+        }
+}
+```
+## 条款11：在operator=中处理“自我赋值”
+```c++
+Widget& Widget::operator=(const Widget& rhs){
+    if (this == &rhs) return *this;
+    delete pb;
+    pb = new Bitmap(*rhs.pb);
+    return *this;
+};
+
+```
+### 上述代码在保证异常安全性上有一定的效果，但是当new失败时，这种仍然会产生异常
+```c++
+Widget& Widget::operator=(const Widget& rhs){
+    Bitmap* pOrig = pb;
+    pb = new Bitmap(*rhs.pb);
+    delete pOrig;
+    return *this;
+};
+```
+### 上述代码可以保证在new失败时仍然可以保存原先的数据。
+```c++
+class Widget{
+    ...
+        void swap(Widget& rhs);
+    
+};
+Widget& Widget::operator=(const Widget& rhs){
+    Widget temp(rhs);
+    swap(temp);
+    return *this;
+};
+Widget& Widget::operator=(Widget rhs){
+    swap(rhs);
+    return *this;
+};
+```
+### 上述使用copy and swap 技术，swap函数用于交换\*this和rhs的数据
+### 上述使用某class的copy assignment操作符或者使用by value方式进行接受实参
+## 条款12：复制对象时勿忘掉其每一个成分
+### copying函数时，其对象中的基类若没被赋值，则会被基类中的构造函数执行缺省的初始化动作；在copy assignment时会对基类中的成员变量保持不变；因此，在派生类中应该注意变量的赋值。o### 不该利用copy assignment操作符调用copy构造函数；两者之间不要直接相会构造，如果两者之间有相似的代码，可以通过建立一个新的成员函数供两者使用。
+### Copying 函数应该确保复制“对象内的所有成员变量”及所有base class成分“。
+# 3资源管理。
+### c++程序中最常使用的资源就是动态分配内存，其他的常见的资源还包括文件描述器、互斥锁、图形界面中的字型和笔刷、数据库连接、以及网络sockets。
