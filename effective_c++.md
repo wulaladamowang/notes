@@ -288,3 +288,84 @@ Widget& Widget::operator=(Widget rhs){
 ### Copying 函数应该确保复制“对象内的所有成员变量”及所有base class成分“。
 # 3资源管理。
 ### c++程序中最常使用的资源就是动态分配内存，其他的常见的资源还包括文件描述器、互斥锁、图形界面中的字型和笔刷、数据库连接、以及网络sockets。
+### 工厂函数：通过指针返回动态分配的对象，可以通过标识位，将返回值类型为基类，但是动态分配的类型是不同的派生类，注意在分配之后内存的释放。
+### 在释放内存的过程中，如果通过函数则函数中途异常则可能导致；资源无法释放。
+### 将资源放在对象内，通过析构函数自动调用机制确保资源被释放。
+### 标准库的auto\_ptr是个类指针对象,其析构函数自动对其所指对象调用delete。
+```c++
+void f(){
+    std::auto_ptr<Investment> pInv(createInvestment());//调用factory函数
+}
+```
+### 获取资源后立即放进管理对象，资源获得时机便是初始化时机。
+### 管理对象运用析构函数确保资源被释放。
+### 注意不要让多个auto\_ptr指向同一对象，可能会导致对象被删除多次，从而引发未定义的行为。
+### auto\_ptr的性质：若通过copy构造函数或copy assignment操作符复制他们，它们会变成null，而复制所得的指针将取得资源的唯一拥有权。
+```c++
+std::auto\_ptr<Investment>
+pInv1(createInvestment());
+std::auto\_ptr<Investment> pInv2(pInv1);//现在pInv2指向对象，pInv1被设为null
+pInv1 = pInv2;//pInv2被设为null
+```
+### auto\_ptr的替代方案是“引用计数型智慧指针”(reference-counting smart pointer:RCSP)
+### auto\_ptr和tr1::shared\_ptr两者在其析构函数内做delete而不是delete[]动作，意味着动态分配而得的array身上使用上述两个智能指针是不好的。
+### resource acquisition is initialization:RAII
+## 条款14：在资源管理类中小心copying行为
+### 假设使用c API函数处理类型为Mutex的互斥
+```c++
+void lock(Mutex* pm);
+void unlock(Mutex* pm);
+class Lock{
+public:
+    explicit Lock(Mutex* pm):mutexPtr(pm, unlock){
+        lock(mutexPtr.get());
+    }
+private:
+    std::tr1::shared_ptr<Mutex> mutexPtr;
+};
+```
+### 当一个RAII对象被复制时会发生什么事情:禁止复制，对底层资源使用引用计数法，复制底部资源，转移底部资源的拥有权。
+## 条款15：在资源管理类中提供对原始资源的访问
+### tr1::shared\_ptr和auto\_ptr函数提供get()成员函数，用于执行显式转换，返回智能指针内部的原始指针(的复件)
+### 隐式转换函数
+```c++
+class Font{
+public:
+    operator FontHandle() const
+    {
+        return f;
+    }
+}
+```
+### APIs往往要求访问原始数据，所以每个RAII class应该提供一个取得其所管理资源的方式
+### 对原始资源的访问可能经过显式转换或者隐式转换，一般而言，显式转换比较安全，但是隐式转换对客户比较方便。
+## 条款16：成对使用new和delete时要采用相同的形式
+### 因为数组中包含数组的大小，因此在new中使用了中括号，则在delete中也要使用中括号，如果没有中括号，则在delete中不应该添加中括号。
+## 条款17：以独立语句将newed对象置入智能指针
+### 智能指针的转换是显式的，不可以进行隐式转换。
+# 4设计与声明
+### 所谓软件设计局，是令软件作出你希望它做的事情。
+## 条款18：让接口容易被正确使用，不易被误用
+```c++
+struct Day {
+    explicit Day(int d):val(d){};
+    int val;
+};
+struct Month {
+    explicit Month(int m):val(m){
+
+    }
+    int val;
+};
+struct Year {
+    explicit Year(int y):val(y){};
+    int val;
+};
+class Date{
+public:
+    Date(const Month& m,const Day& d, const Year& y);
+}
+```
+### 阻止误用的办法包括建立新类型、限制类型上的操作、束缚对象值以及消除客户的资源管理责任。
+## 条款19：设计class犹如设计type
+## 条款20：宁以pass-by-reference-to-const替换pass-by-value
