@@ -369,3 +369,22 @@ public:
 ### 阻止误用的办法包括建立新类型、限制类型上的操作、束缚对象值以及消除客户的资源管理责任。
 ## 条款19：设计class犹如设计type
 ## 条款20：宁以pass-by-reference-to-const替换pass-by-value
+### 尽量以pass-by-reference-to-const替换pass-by-value。前者通常比较高效，并且可以避免切割问题。
+### 以上规则并不适用于内置类型，以及stl的迭代器和函数对象，对他们而言，pass-by-value往往比较妥当。
+### 切割问题：当一个derived class对象以by value方式传递并被视为一个base class对象，base class的copy构造函数会被调用，而造成此对象的行为像个derived class对象的那些特化性质会被全切割掉了，仅仅留下一个base class对象。通过pass-by-reference-to-const本质上是指针的操作可以使得解决切割现象。
+## 条款21：必须返回对象时，别妄想返回其reference
+### 不要返回一个pointer或reference指向一个local stack对象，或者指向一个local static对象，以为有时可能需要多个这样的对象。
+## 条款22：将成员变量声明为private
+### protected并不比public更具封装性
+## 条款23：宁以non-member,no-friend替换member函数
+### 越多的东西被封装，越少的人可以看到他，我们就越有较大的弹性去改变他。越多东西被封装，我们改变那些东西的能力也就越大。封装时的能够改变事物只影响有限客户。
+### 考虑对象内的数据，越少的代码可以看到数据，越多的数据可以被封装，也就越有自由的改变对象数据。越多函数可以访问他，数据的封装性就越低。
+### 有时候non-member non-friend函数比member函数更好，因为他不会改变能够访问class内之private成分的函数数量，就有更大的封装性。
+### 使用non-member non-friend函数替换member 函数，可以增加封装性、包裹弹性和机能扩展性。## 条款24：若所有参数皆需要类型转换，请为此采用non-member函数
+### 如果你需要为某个函数的所有参数进行类型转换，采用non member函数。
+## 条款25：考虑写出一个不抛出异常的swap函数
+### c++不支持函数版本的偏特化版本
+# 5:实现
+## 条款26：尽可能延后变量定义式出现时间
+
+
