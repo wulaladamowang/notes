@@ -386,5 +386,12 @@ public:
 ### c++不支持函数版本的偏特化版本
 # 5:实现
 ## 条款26：尽可能延后变量定义式出现时间
-
+### 延后定义直到能够给它初值实参为止。
+### 如果classes的一个赋值成本小于一组构造加析构成本，那么将变量定义在循环之外更好，否则，将变量定义在循环之内。
+## 条款27：尽量少做转型动作
+### c++中的四种新式转型方法：const\_cast<T>(expression),dynamic\_cast<T>(expression),reinterpret\_cast<T>(expression),static\_cast<T>(expression);
+### const\_cast通常用来将对象的常量性移除。
+### dynamic\_cast主要用来执行安全向下转型，也就是用来决定某个对象是否归属继承体系中的某个类型。
+### reinterpret\_cast意图执行低级转型，实际动作取决于编译器，其不可移植,例如将一个pointer to int转型为int。
+### static\_cast用来强迫隐式转换,例如将non-const对象转换为const对象，int转换为double对象.
 
