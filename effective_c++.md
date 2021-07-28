@@ -394,4 +394,13 @@ public:
 ### dynamic\_cast主要用来执行安全向下转型，也就是用来决定某个对象是否归属继承体系中的某个类型。
 ### reinterpret\_cast意图执行低级转型，实际动作取决于编译器，其不可移植,例如将一个pointer to int转型为int。
 ### static\_cast用来强迫隐式转换,例如将non-const对象转换为const对象，int转换为double对象.
+### (T)expression 和T(expression)称为旧式转型
+### 在注重效率的代码中避免dynamic_casts。
+### 使用新式转型方式，而非旧式转型方式，其容易辨识。
+## 条款28：避免返回handles指向对象内部成分
+### 成员变量的封装性最多只等于返回其reference的函数的访问级别。
+### const成员函数传出一个reference，后者所指数据与对象自身有关联，而他又存储在对象之外，那末这个函数的调用者可以修改那笔数据。
+### 成员函数返回references、指针、和迭代器统称为handles，返回一个代表对象内部的handle会导致降低对象的封装性，即使是const成员函数也有可能造成对象状态被更改。
+### 可以令返回reference为const,但有可能导致dangling handles,空悬。
+## 条款29：为“异常安全”而努力是值得的
 
