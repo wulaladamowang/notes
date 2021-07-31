@@ -434,3 +434,85 @@ public:
 ### 声明non-virtual函数的目的是为了令derived classes继承函数的接口及一份强制性的实现。
 ## 条款35：考虑virtual函数以外的其他选择
 ### NVI(non-virtual interface)手法：令客户通过public non-virtual成员函数间接调用private virtual函数。
+### 使用NVI手法可以保证在virtual函数真正被调用之前能够设定好适当场景，在结束之后能够清理现场。
+### NVI手法允许derived classes重新定义virtual函数，从而赋予他们如何实现机能的控制能力，但是base class保留诉说函数何时被调用的权利。NVI手法对public virtual函数是一个有趣的替代方案。
+### 藉由Function Pointer实现Strategy模式
+```c++
+class GameCharacter;
+int defaultHealthCalc(const GameCharacter& gc);//缺省算法
+class GameCharacter{
+public:
+    typedef int (*HealthCalcFunc)(const GameCharacter&);
+    explicit GameCharacter(HealthCalcFunc hcf = defaultHealthCalc):healthFunc(hcf){}
+    int healthValue() const{return healthFunc(*this);}
+private:
+    HealthCalcFunc healthFunc;
+};
+class EvilBadGuy: public GameCharacter{
+public:
+    explicit EvilBadGuy(HealthCalcFunc hcf = defaultHealthCalc):GameCharacter(hcf){}
+
+};
+int loseHealthQuickly(const GameCharacter&);
+int loseHealthSlowly(const GameCharacter&);
+EvilBadGuy ebg1(loseHealthSlowly);
+EvilBadGuy ebg2(loseHealthQuickly);
+```
+### 通过指针可以在运行时确定调用不同的函数
+### 藉由tr1::function完成Strategy模式，形成对象，参数进行隐形转换就可以使用
+## 条款36：绝不定义继承而来的non-virtual函数
+## 条款37：绝不重新定义继承而来的缺省参数数值
+### virtual 函数是动态绑定的，而缺省参数值是静态绑定的。
+### 静态类型是目标对象声明的类型，动态类型是目标对象所指的对象。
+## 条款38：通过复合塑模出has-a或根据某物实现出
+### 复合的意义和public继承完全不同
+### 在应用域，复合意味has-a。在实现域，复合意味者根据某物实现出。如通过deque实现stack
+## 条款39：明智而谨慎的使用private继承
+### private base class继承而来的所有成员，在derived class中会变成private属性，纵使他们在base class中原来是protected或public属性；private意味着implemented-in-terms-of(根据某物实现出)；如果使用class D以private 形式继承B,则用意为采用B内已经具备的某些特性，不是因为BD有任何观念上的关系。
+### private继承意味着is-implemented-in-term of,他通常使用情况比复合的级别底，但是当derived class需要访问projected base class的成员，或需要重新定义继承而来的virtual函数时，这么设计是合理的。
+### 和复合不同的是，private继承可以造成empty base最优化，这对致力于对象尺寸最小化的程序库开发者而言可能很重要。
+## 条款40：明智而审慎地使用多重继承
+### 多重继承比单一继承复杂。他可能导致新的歧义性，以及对virtual继承的需要。
+### virtual继承会增加大小、速度、初始化复杂度等等成本，如果virtual base classes不带任何数据，将是最具实用价值的情况。
+### 多重继承的确有重要的正当用途。其中一个情节及public继承某个interface class，和private 继承某个协助实现的class的两相组合。
+# 7模板和泛型编程
+## 条款41：了解隐式接口和编译期多态
+### 运行期多态和编译期多态之间的差异类似于哪一个重载函数应该被调用和哪一个virtual函数应该被绑定之间的差异。
+### 通常显式接口由函数的签名式（也就是函数名称、参数类型、返回类型）构成;隐式接口由有效表达式组成。
+## 条款42：了解typename的双重意义
+### 声明template参数时，不论使用关键字class或typename意义完全相同。
+### template内出现的名称相依于某个template参数，称之为从属名称。如果从属名称在class内呈现嵌套状，则称他为嵌套从属名称；不依赖任何template参数的名称的类型，如int称之为非从属名称。
+### 由于嵌套从属名称依赖于template参数，在未确定参数时，无法解析，因此c++默认解析嵌套从属名称不是类型，除非我们告诉他是，通过在嵌套从属名称之前添加typename ，可以说明嵌套从属名称是一个类型。
+```c++
+template<typename C>
+void print2nd(const C& container){
+    if (container.size() >= 2){
+        typename C::const_iterator iter(container.begin());
+    }
+}
+//上述C::const_iterator iter即为一个嵌套从属名称
+template<typename>// 允许使用“typename”或者"class"
+void f(const C& container,//不允许使用typename,C并非嵌套于任何取决于template参数的东西内
+       typename C::iterator iter);//一定要使用typename
+```
+### 上述规则的例外是：typename不可以出现在base classes list内的嵌套从属类型名称之前，也不可出现在member initialization list(成员初值列)中作为base class 修饰符。
+```c++
+template<typename T>
+class Derived: public Base<T>::Nested {//base class list中不允许typename
+public:
+    explicit Derived(int x):Base<T>::Nested(x) // mem init.list中
+    {
+        typename Base<T>::Nested temp;//嵌套从属类型，既不在base class list中，也不在mem.init.list中，作为base class修饰符需要加上typename
+    }
+};
+template<typename T>
+void workWithIterator(T iter){
+    typedef typename std::iterator_traits<T>::value_type value_type;
+    value_type temp(*iter);
+};
+```
+## 条款43：学习处理模板化基类内的名称
+
+
+
+
