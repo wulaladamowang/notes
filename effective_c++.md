@@ -424,4 +424,13 @@ public:
 ### 支持编译依存性最小化的一般构想时：相依于声明式，不要依存于定义式。基于此构想的两个手段是:handle classes和Interface class。
 # 6继承与面向对象设计
 ## 条款32：确定你的public继承塑模出is-a关系
-
+### 如果令class D以public形式继承class B，便是告诉c++编译器，每一个类型D对象同时也是一个类型为B的对象。
+## 避免遮掩继承而来的名称
+### drived classes内的名称会遮掩base classes内的名称，在public继承下从来没有人希望如此。
+### 为了使得遮掩的名称重见天日，可以使用using声明式或转交函数。
+## 条款34：区分接口继承和实现继承
+### 声明一个pure virtual函数的目的是为了让derived classes只是继承函数接口。
+### 声明简朴的impure virtual函数的目的，是让derived classes继承该函数的接口和缺省实现。
+### 声明non-virtual函数的目的是为了令derived classes继承函数的接口及一份强制性的实现。
+## 条款35：考虑virtual函数以外的其他选择
+### NVI(non-virtual interface)手法：令客户通过public non-virtual成员函数间接调用private virtual函数。
