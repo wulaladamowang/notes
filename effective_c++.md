@@ -512,7 +512,45 @@ void workWithIterator(T iter){
 };
 ```
 ## 条款43：学习处理模板化基类内的名称
-
-
-
-
+### 可以在derived class templates 内通过this->指涉base class templates内的成员名称，或藉由一个明白写出的base class资格修饰符完成。using  或者知名类名称。
+## 条款44：将与参数无关的的代码抽离templates
+## 条款45：运用成员函数模板接受所有兼容类型
+```c++
+// member function
+template<typename T>
+class SmartPtr {
+public:
+    template<typename U>
+        SmartPtr(const SmartPtr<U>& other);
+};
+template<typename T>
+class SmartPtr{
+public:
+    template<typename U>
+        SmartPtr(const SmartPtr<U>& other): heldPtr(other.get()) {...};
+    T* get() const {return heldPtr;};
+private:
+    T* heldPtr;
+};
+//以类型为U*的指针初始化，只有当存在一个隐式转换时才会通过编译
+```
+### 在声明member templates用于泛化copy构造或泛化assignment操作，还是需要声明正常的copy 构造函数和copy assignment操作符。
+## 条款46：需要类型转换时请为模板定义非成员函数
+### template在进行实参推导过程中不会将隐式转换转换考虑在内。template中功能是通过参数确定是否有函数，而不可通过函数去推导参数。
+### class templates不依赖template实参推导，因为参数在调用过程中已经传递进去。
+```c++
+template<typename T>
+class Retional {
+public:
+    friend const Rational operator*(const Rational& lhs, const Rational& rhs){};
+}
+//声明为友元函数之后可以进行隐式转化,声明式不够，需要定义在模板类中。
+```
+### 在一个class template内，template名称可以被用来作为template和其参数的简略表达方式。
+## 条款47：请使用traits classes表现类型信息
+## 认识template元编程
+# 8定制new和delete
+## 条款49：了解new-handler的行为
+## 条款50：了解new和delete的合理替换时机
+## 条款51：编写new和delete时需要固守常规
+## 条款52: 写了placement new 也要写placement delete
